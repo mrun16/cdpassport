@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>C&amp;D Passport | Construction &amp; Demolition Waste Traceability</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <style>
+    :root {
+      --green: #0e4d3a;
+      --green2: #166a4f;
+      --navy: #12305a;
+      --saffron: #e0560d;
+      --paper: #f3f5f7;
+      --card: #fff;
+      --ink: #1b2430;
+      --mute: #5b6675;
+      --line: #d3dae3;
+      --ok: #1b7a43;
+      --warn: #b26a00;
+      --bad: #b3261e;
+      --okbg: #e6f3ec;
+      --warnbg: #fdf1dc;
+      --badbg: #fbe7e5
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-padding-top: 12px
+    }
+
+    body {
+      margin: 0;
+      font: 15px/1.5 "Public Sans", system-ui, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--paper)
+    }
+
+    .tri {
+      height: 5px;
+      background: linear-gradient(90deg, #e8750d 33%, #fff 33% 66%, #1b7a43 66%)
+    }
+
+    header.top {
+      background: #fff;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0
+    }
+
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 4px;
+      background: var(--green);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--navy);
+      line-height: 1.2
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--mute);
+      font-size: 13px
+    }
+
+    .brand .who {
+      margin-left: auto;
+      text-align: right;
+      font-size: 13px;
+      color: var(--mute)
+    }
+
+    nav {
+      background: var(--green)
+    }
+
+    nav .wrap {
+      display: flex;
+      gap: 2px;
+      overflow-x: auto
+    }
+
+    nav a {
+      color: #dcefe7;
+      text-decoration: none;
+      padding: 12px 18px;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap
+    }
+
+    nav a:hover {
+      background: var(--green2)
+    }
+
+    nav a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid #f2a65a;
+      outline-offset: 1px
+    }
+
+    nav a.on {
+      color: #fff;
+      border-color: var(--saffron);
+      background: var(--green2)
+    }
+
+    main {
+      padding: 24px 0 56px
+    }
+
+    .crumb {
+      font-size: 13px;
+      color: var(--mute);
+      margin-bottom: 6px
+    }
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      color: var(--navy)
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: var(--navy)
+    }
+
+    .lede {
+      color: var(--mute);
+      margin: 0 0 20px;
+      max-width: 70ch
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 20px;
+      margin-bottom: 20px
+    }
+
+    .card>h3 {
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      border-top: 4px solid var(--green)
+    }
+
+    .kpi {
+      padding: 18px 20px;
+      border-right: 1px solid var(--line)
+    }
+
+    .kpi:last-child {
+      border: 0
+    }
+
+    .kpi b {
+      display: block;
+      font-size: 32px;
+      color: var(--navy);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1
+    }
+
+    .kpi small {
+      display: block;
+      color: var(--mute);
+      margin-top: 6px
+    }
+
+    .kpi span {
+      font-weight: 600
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px 18px
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 4px
+    }
+
+    label i {
+      font-weight: 400;
+      color: var(--mute);
+      font-style: normal
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid #8c97a6;
+      border-radius: 3px;
+      font: inherit;
+      background: #fff
+    }
+
+    textarea {
+      min-height: 70px
+    }
+
+    .btn {
+      background: var(--saffron);
+      color: #fff;
+      border: 0;
+      border-radius: 3px;
+      padding: 10px 18px;
+      font: 600 14px inherit;
+      font-family: inherit;
+      cursor: pointer
+    }
+
+    .btn:hover {
+      background: #c24a0a
+    }
+
+    .btn.sec {
+      background: #fff;
+      color: var(--navy);
+      border: 1px solid var(--navy)
+    }
+
+    .btn.sec:hover {
+      background: #eef2f8
+    }
+
+    .btn.sm {
+      padding: 6px 12px;
+      font-size: 13px
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px
+    }
+
+    th {
+      text-align: left;
+      background: #eaeef3;
+      color: var(--navy);
+      padding: 9px 10px;
+      border-bottom: 2px solid var(--line);
+      font-weight: 600
+    }
+
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top
+    }
+
+    td.n,
+    th.n {
+      text-align: right;
+      font-variant-numeric: tabular-nums
+    }
+
+    tr.click {
+      cursor: pointer
+    }
+
+    tr.click:hover {
+      background: #f6f9fc
+    }
+
+    .scroll {
+      overflow-x: auto
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid
+    }
+
+    .green {
+      color: var(--ok);
+      background: var(--okbg);
+      border-color: #9bd0b3
+    }
+
+    .amber {
+      color: var(--warn);
+      background: var(--warnbg);
+      border-color: #e8c27a
+    }
+
+    .red {
+      color: var(--bad);
+      background: var(--badbg);
+      border-color: #e6a6a1
+    }
+
+    .grey {
+      color: var(--mute);
+      background: #eef0f3;
+      border-color: var(--line)
+    }
+
+    .alert {
+      padding: 12px 14px;
+      border-left: 4px solid;
+      border-radius: 2px;
+      margin-bottom: 14px
+    }
+
+    .alert.red {
+      border-color: var(--bad)
+    }
+
+    .alert.amber {
+      border-color: var(--warn)
+    }
+
+    .alert.green {
+      border-color: var(--ok)
+    }
+
+    .bar {
+      height: 10px;
+      background: #e3e8ee;
+      border-radius: 2px;
+      min-width: 90px
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      background: var(--green2);
+      border-radius: 2px
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px
+    }
+
+    .tl {
+      list-style: none;
+      margin: 0;
+      padding: 0
+    }
+
+    .tl li {
+      padding: 0 0 14px 18px;
+      border-left: 2px solid var(--line);
+      position: relative;
+      font-size: 14px
+    }
+
+    .tl li:before {
+      content: "";
+      position: absolute;
+      left: -6px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green)
+    }
+
+    .tl code {
+      color: var(--mute);
+      font-size: 12px
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--mute)
+    }
+
+    .foot {
+      color: var(--mute);
+      font-size: 12.5px;
+      margin-top: 8px
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      background: #fff;
+      padding: 16px 0;
+      color: var(--mute);
+      font-size: 13px
+    }
+
+    #toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 3px;
+      display: none;
+      max-width: 360px;
+      z-index: 9
+    }
+
+    #toast.err {
+      background: var(--bad)
+    }
+
+    .cert {
+      border: 2px solid var(--green);
+      padding: 28px;
+      background: #fff;
+      max-width: 760px
+    }
+
+    .cert h2 {
+      text-align: center
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 6px 14px;
+      font-size: 14px
+    }
+
+    .kv dt {
+      color: var(--mute)
+    }
+
+    .kv dd {
+      margin: 0;
+      font-weight: 500
+    }
+
+    .kpis.s5 {
+      grid-template-columns: repeat(5, 1fr)
+    }
+
+    .kpis.s5 .kpi b {
+      font-size: 24px
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .thumb {
+      width: 64px;
+      height: 48px;
+      object-fit: cover;
+      border: 1px solid var(--line)
+    }
+
+    a.btn {
+      text-decoration: none;
+      display: inline-block
+    }
+
+    @media(max-width:800px) {
+
+      .kpis,
+      .kpis.s5 {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .kpi:nth-child(2) {
+        border-right: 0
+      }
+
+      .kpi {
+        border-bottom: 1px solid var(--line)
+      }
+
+      .two {
+        grid-template-columns: 1fr
+      }
+
+      .brand .who {
+        display: none
+      }
+    }
+
+    @media print {
+
+      .tri,
+      header.top,
+      nav,
+      footer,
+      .noprint {
+        display: none !important
+      }
+
+      body {
+        background: #fff
+      }
+
+      .cert {
+        border-width: 2px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="tri"></div>
+  <header class="top">
+    <div class="wrap brand">
+      <div class="mark" aria-hidden="true">C&amp;D</div>
+      <div>
+        <h1>C&amp;D Passport</h1>
+        <p>Construction &amp; Demolition Waste Traceability System</p>
+      </div>
+      <div class="who">Officer Console<br>Demonstration build</div>
+    </div>
+  </header>
+  <nav aria-label="Main">
+    <div class="wrap" id="nav"></div>
+  </nav>
+  <main>
+    <div class="wrap" id="app"></div>
+  </main>
+  <footer>
+    <div class="wrap">Prototype for demonstration. Emission factors are indicative placeholders and must be replaced
+      with sourced values before any figure is published.</div>
+  </footer>
+  <div id="toast" role="status"></div>
+  <script>
+    const $ = s => document.querySelector(s), esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const api = async (u, o) => { const r = await fetch("/api" + u, o && { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(o) }); const j = await r.json(); if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Please check the form fields and try again."); return j };
+    const toast = (m, e) => { const t = $("#toast"); t.textContent = m; t.className = e ? "err" : ""; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 4500) };
+    const fmt = (n, d = 1) => Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: d });
+    const chip = l => `<span class="chip ${l}">${{ green: "Compliant", amber: "Review", red: "Violation" }[l]}</span>`;
+    const st = { CREATED: ["grey", "Passport issued"], IN_TRANSIT: ["amber", "In transit"], DELIVERED: ["amber", "Awaiting receipt"], CERTIFIED: ["green", "Certified"], REJECTED: ["red", "Rejected"] };
+    const stc = s => `<span class="chip ${st[s][0]}">${st[s][1]}</span>`;
+    let META; const here = () => (location.hash.slice(1).split("?")[0]) || "/";
+    const tabs = [["/", "Dashboard", "officer municipal facility buyer"], ["/audit", "Site audit", "officer"], ["/facilities", "Facilities", "officer facility municipal"], ["/loads", "Load passports", "officer driver"], ["/facility", "Facility desk", "facility"], ["/batches", "Batches", "facility municipal"], ["/market", "Marketplace", "officer facility municipal buyer"], ["/reports", "Citizen reports", "municipal"], ["/report", "Report dumping", "officer driver facility municipal buyer"]];
+    const geo = () => new Promise(r => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => r({ lat: p.coords.latitude, lng: p.coords.longitude }), () => r({}), { timeout: 6000 }) : r({}));
+    const head = (c, t, l) => `<div class="crumb">${c}</div><h2>${t}</h2><p class="lede">${l}</p>`;
+    async function route() {
+      META = META || await api("/meta"); const h = here(), U = user(); if (!U && !/^\/(report|verify|batch|reuse|login)/.test(h)) { location.hash = "/login"; return }
+      $(".who").innerHTML = U ? `${esc(U.mobile)} (${ROLES[U.role]})<br><a href="#/login" id="so">Sign out</a>` : "Not signed in"; if ($("#so")) $("#so").onclick = () => localStorage.removeItem("cdp_user"); $("#nav").innerHTML = navTabs().map(([p, l]) => `<a href="#${p}" class="${h === p || (p !== "/" && h.startsWith(p + "/")) ? "on" : ""}">${l}</a>`).join("");
+      const m = h.match(/^\/(loads|verify|batch|reuse)\/(.+)$/), a = h.match(/^\/audit\/(.+)$/);
+      try {
+        if (m && m[1] === "loads") await pgLoad(m[2]); else if (m && m[1] === "batch") await pgBatchView(m[2]); else if (m && m[1] === "reuse") await pgReuse(m[2]); else if (m) await pgVerify(m[2]); else if (a) await pgAuditView(a[1]);
+        else await ({ "/": pgDash, "/audit": pgAudit, "/loads": pgLoads, "/facility": pgFacility, "/facilities": pgFacilities, "/batches": pgBatches, "/market": pgMarket, "/reports": pgReports, "/report": pgReport, "/login": pgLogin }[h] || pgDash)();
+      } catch (e) { $("#app").innerHTML = `<div class="alert red">${esc(e.message)}</div>` }
+      window.scrollTo(0, 0)
+    }
+    addEventListener("hashchange", route);
+
+    async function pgDash() {
+      const audits = await api("/audits"); const sel = sessionStorage.aud || ""; const d = await api("/dashboard" + (sel ? "?audit_id=" + sel : ""));
+      let h = head("Home / Dashboard", "Site diversion dashboard", "Material received, recovered and diverted from landfill across all certified loads.");
+      h += `<div class="card" style="padding:14px 20px"><div class="row" style="align-items:end"><div><label for="f">Show results for</label><input id="f" list="fl" autocomplete="off" placeholder="All registered sites (type a name or ID)" value="${esc((audits.find(a => a.id === sel) || {}).project || "")}"><datalist id="fl">${audits.map(a => `<option value="${esc(a.project)}">${a.id}</option>`).join("")}</datalist></div><div><button class="btn sec" id="demo">Load demonstration data</button></div></div></div>`;
+      if (!d.loads) return $("#app").innerHTML = h + `<div class="card empty"><b>No loads recorded yet.</b><br>Register a site audit, issue passports for each load, then record facility receipts. Results appear here once a load is certified.</div>`, bind();
+      h += `<div class="kpis"><div class="kpi"><b>${fmt(d.diversion_rate)}%</b><span>Diversion rate</span><small>${fmt(d.diverted_t)} of ${fmt(d.received_t)} t received</small></div>
+ <div class="kpi"><b>${fmt(d.co2_avoided_t)} t</b><span>CO₂e avoided</span><small>Indicative, from recovered material</small></div>
+ <div class="kpi"><b>${fmt(d.virgin_saved_t)} t</b><span>Virgin material saved</span><small>Recycled aggregate replacing quarried stone</small></div>
+ <div class="kpi"><b>${fmt(d.landfill_avoided_m3)} m³</b><span>Landfill avoided</span><small>${fmt(d.landfill_avoided_t)} t at 1.6 t/m³</small></div></div>`;
+      h += statStrip(d) + quick(); h += `<div class="two"><div class="card"><h3>Recovery by material</h3><div class="scroll"><table><thead><tr><th>Material</th><th class="n">Received (t)</th><th class="n">Recovered (t)</th><th>Recovery</th></tr></thead><tbody>${Object.values(d.by_category).map(k => { const p = k.received_t ? k.recovered_t / k.received_t * 100 : 0; return `<tr><td>${esc(k.label)}</td><td class="n">${fmt(k.received_t, 2)}</td><td class="n">${fmt(k.recovered_t, 2)}</td><td><div class="bar" title="${fmt(p)}%"><i style="width:${p}%"></i></div></td></tr>` }).join("")}</tbody></table></div></div>
+ <div class="card"><h3>Load status</h3><table><tbody><tr><td>Passports issued</td><td class="n">${d.loads}</td></tr><tr><td>In transit</td><td class="n">${d.in_transit}</td></tr><tr><td>Certified</td><td class="n">${d.certified}</td></tr><tr><td>Rejected at facility</td><td class="n">${d.rejected}</td></tr><tr><td>Flagged for review</td><td class="n">${d.amber}</td></tr><tr><td>Violations</td><td class="n">${d.red}</td></tr></tbody></table></div></div>`;
+      $("#app").innerHTML = h; bind(); drawMap();
+      function bind() { $("#f") && ($("#f").onchange = e => { const v = e.target.value.trim().toLowerCase(); if (!v) { sessionStorage.aud = ""; return route() } const a = audits.find(x => x.id.toLowerCase() === v || x.project.toLowerCase() === v); if (!a) return toast("No site audit matches that name or ID. Clear the box to see all sites.", 1); sessionStorage.aud = a.id; route() }); $("#demo").onclick = async () => { await api("/demo", {}); toast("Demonstration data loaded."); route() } }
+    }
+
+    const catOpts = () => Object.entries(META.categories).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("");
+    async function pgAudit() {
+      const list = await api("/audits");
+      let h = head("Home / Site audit", "Pre-demolition site audit", "Record the building, hazards and an estimate of each material stream. The system returns a recovery and routing plan.");
+      h += `<form class="card" id="af"><h3>1. Site details</h3><div class="row"><div><label>Project name</label><input name="project" required></div><div><label>Site address</label><input name="address" required></div><div><label>Auditing officer</label><input name="officer" required></div><div><label>Building age <i>(years)</i></label><input name="building_age" type="number" min="0"></div><div><label>Structure type</label><input name="structure" placeholder="e.g. RCC frame, brick infill"></div><div><label>Built-up area <i>(m²)</i></label><input name="area_sqm" type="number" min="0"></div></div>
+ <h3 style="margin-top:22px">2. Material inventory <i style="font-weight:400;color:var(--mute)">(estimated tonnes)</i></h3><div class="row">${Object.entries(META.categories).map(([k, v]) => `<div><label for="m_${k}">${esc(v.label)}</label><input id="m_${k}" data-cat="${k}" type="number" min="0" step="0.1" placeholder="0"></div>`).join("")}</div>
+ <h3 style="margin-top:22px">3. Hazard scan</h3><div class="row"><div><label>Hazards found <i>(one per line)</i></label><textarea name="hazards" placeholder="Asbestos sheets - annex roof"></textarea></div><div><label>Salvageable items</label><textarea name="salvage" placeholder="Doors, windows, steel sections"></textarea></div><div><label>Demolition and segregation plan</label><textarea name="plan"></textarea></div></div>
+ <p><button class="btn">Generate recovery plan</button></p></form>
+ <div class="card"><h3>Registered audits</h3>${list.length ? `<div class="scroll"><table><thead><tr><th>Audit</th><th>Project</th><th>Address</th><th>Hazards</th><th class="n">Est. total (t)</th></tr></thead><tbody>${list.map(a => `<tr class="click" onclick="location.hash='/audit/${a.id}'"><td>${a.id}</td><td>${esc(a.project)}</td><td>${esc(a.address)}</td><td>${a.hazard_flag ? '<span class="chip red">Hazard flagged</span>' : '<span class="chip green">None recorded</span>'}</td><td class="n">${fmt(a.items.reduce((s, i) => s + i.est_tonnes, 0))}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">No audits yet. Complete the form above to register the first site.</div>`}</div>`;
+      $("#app").innerHTML = h;
+      $("#af").onsubmit = async e => {
+        e.preventDefault(); const f = new FormData(e.target), o = Object.fromEntries(f);
+        o.items = [...document.querySelectorAll("[data-cat]")].filter(i => +i.value > 0).map(i => ({ category: i.dataset.cat, est_tonnes: +i.value }));
+        o.hazards = (o.hazards || "").split("\n").filter(Boolean).map(k => ({ kind: k }));["building_age", "area_sqm"].forEach(k => o[k] = o[k] ? +o[k] : null);
+        try { const a = await api("/audits", o); toast("Audit " + a.id + " registered."); location.hash = "/audit/" + a.id } catch (x) { toast(x.message, 1) }
+      }
+    }
+    async function pgAuditView(id) {
+      const a = await api("/audits/" + id), ps = await api("/passports?audit_id=" + id);
+      let h = head(`<a href="#/audit">Site audit</a> / ${a.id}`, esc(a.project), `${esc(a.address)}. Audited by ${esc(a.officer)} on ${a.created.slice(0, 10)}.`);
+      if (a.hazard_flag) h += `<div class="alert red"><b>Hazardous material recorded.</b> It must never enter the recycling stream. Hazardous loads can only be routed to an approved hazardous facility.${a.hazards.map(x => `<br>• ${esc(x.kind)}`).join("")}</div>`;
+      h += `<div class="card"><h3>Recovery and routing plan</h3><div class="scroll"><table><thead><tr><th>Material</th><th class="n">Estimate (t)</th><th>Route</th><th>Tests required</th><th class="n">Expected recovery (t)</th><th></th></tr></thead><tbody>${a.plan.map(p => `<tr><td>${esc(p.label)}</td><td class="n">${fmt(p.est_tonnes)}</td><td>${esc(p.route)}</td><td>${esc(p.tests)}</td><td class="n">${fmt(p.expected_recovered_t)}</td><td><a class="btn sm" style="text-decoration:none;display:inline-block" href="#/loads?a=${a.id}&c=${p.category}">Issue passport</a></td></tr>`).join("")}</tbody></table></div></div>
+ <div class="card"><h3>Load passports for this site</h3>${loadTable(ps)}</div>`;
+      $("#app").innerHTML = h
+    }
+
+    const loadTable = ps => ps.length ? `<div class="scroll"><table><thead><tr><th>Passport</th><th>Material</th><th class="n">Declared (kg)</th><th>Vehicle</th><th>Status</th><th>Compliance</th></tr></thead><tbody>${ps.map(p => `<tr class="click" onclick="location.hash='/loads/${p.id}'"><td>${p.id}</td><td>${esc(META.categories[p.category].label)}</td><td class="n">${fmt(p.declared_kg, 0)}</td><td>${esc(p.vehicle)}</td><td>${stc(p.status)}</td><td>${chip(p.light)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">No load passports yet.</div>`;
+    async function pgLoads() {
+      const [ps, audits] = await Promise.all([api("/passports"), api("/audits")]); const q = new URLSearchParams(location.hash.split("?")[1] || "");
+      let h = head("Home / Load passports", "Load passports", "Every truckload receives a passport with a QR code, declared weight, vehicle, driver and an authorised destination.");
+      h += `<form class="card" id="pf"><h3>Issue a passport</h3><div class="row"><div><label>Site audit <i>(type the project name or ID)</i></label><input name="audit_id" list="al" required autocomplete="off" value="${esc((audits.find(a => a.id === q.get("a")) || {}).project || "")}"><datalist id="al">${audits.map(a => `<option value="${esc(a.project)}">${a.id}</option>`).join("")}</datalist></div>
+ <div><label>Material</label><select name="category" id="pc">${catOpts()}</select></div><div><label>Destination facility <i>(type the name)</i></label><input name="facility_name" required autocomplete="off" list="pfl"><datalist id="pfl"></datalist></div>
+ <div><label>Declared weight <i>(kg)</i></label><input name="declared_kg" type="number" min="1" required></div><div><label>Vehicle number</label><input name="vehicle" required placeholder="MH00 AB 0000"></div><div><label>Driver name</label><input name="driver" required></div><div><label>Facility latitude <i>(optional)</i></label><input name="facility_lat" type="number" step="any"></div><div><label>Facility longitude <i>(optional)</i></label><input name="facility_lng" type="number" step="any"></div></div><p class="foot">If the site name is new, the site is created and the load is flagged until a pre-demolition audit is recorded. If the facility is new, it is registered for this material. Add its latitude and longitude so the arrival can be checked against a 300 m geofence.</p>
+ <p class="foot">Loading location is captured from this device when you issue the passport.</p><p><button class="btn" ${audits.length ? "" : "disabled"}>Issue passport</button> ${audits.length ? "" : "<span class='foot'>Register a site audit first.</span>"}</p></form>
+ <div class="card"><h3>All passports</h3>${loadTable(ps)}</div>`;
+      $("#app").innerHTML = h;
+      const sync = () => { const c = $("#pc").value; $("#pfl").innerHTML = META.facilities.filter(f => f.accepts.includes(c)).map(f => `<option value="${esc(f.name)}">`).join("") };
+      if (q.get("c")) $("#pc").value = q.get("c"); $("#pc").onchange = sync; sync();
+      $("#pf").onsubmit = async e => {
+        e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); o.declared_kg = +o.declared_kg;["facility_lat", "facility_lng"].forEach(k => o[k] = o[k] ? +o[k] : null); Object.assign(o, await geo());
+        try { const p = await api("/passports", o); toast("Passport " + p.id + " issued."); location.hash = "/loads/" + p.id } catch (x) { toast(x.message, 1) }
+      }
+    }
+    async function pgLoad(id) {
+      const p = await api("/passports/" + id), c = META.categories[p.category];
+      let h = head(`<a href="#/loads">Load passports</a> / ${p.id}`, `Passport ${p.id}`, `${esc(c.label)} from ${esc(p.audit.project)} to ${esc(p.facility.name)}.`);
+      h += p.flags.map(f => `<div class="alert amber">${esc(f)}</div>`).join("");
+      h += `<div class="two"><div><div class="card"><h3>Load details</h3><dl class="kv"><dt>Status</dt><dd>${stc(p.status)} ${chip(p.light)}</dd><dt>Material</dt><dd>${esc(c.label)}</dd><dt>Declared weight</dt><dd>${fmt(p.declared_kg, 0)} kg</dd><dt>Vehicle / driver</dt><dd>${esc(p.vehicle)} / ${esc(p.driver)}</dd><dt>Origin</dt><dd>${esc(p.audit.address)}${p.lat != null ? ` (${p.lat.toFixed(4)}, ${p.lng.toFixed(4)})` : ""}</dd><dt>Destination</dt><dd>${esc(p.facility.name)}</dd><dt>Intended output</dt><dd>${esc(c.out)}</dd></dl>
+ <p class="noprint" style="margin-bottom:0">${p.status === "CREATED" ? '<button class="btn" id="go">Start trip</button>' : ""}${p.status === "IN_TRANSIT" ? '<button class="btn" id="go">Confirm arrival at facility</button>' : ""}${p.status === "DELIVERED" ? `<a class="btn" style="text-decoration:none;display:inline-block" href="#/facility?p=${p.id}">Record facility receipt</a>` : ""}${p.cert ? `<a class="btn" style="text-decoration:none;display:inline-block" href="#/verify/${p.id}">View certificate</a>` : ""}</p></div>
+ <div class="card"><h3>Chain of custody</h3><ul class="tl">${p.events.map(e => `<li><b>${e.type.replace(/_/g, " ").toLowerCase().replace(/^./, x => x.toUpperCase())}</b><br>${e.ts.replace("T", " ").slice(0, 19)} UTC<br><code>hash ${e.hash}</code></li>`).join("")}</ul><p class="foot">Each entry is hash-linked to the previous one so edits are detectable.</p></div></div>
+ <div class="card"><h3>Passport QR</h3><div id="qr"></div><p class="foot">Scan to open the public verification page.</p><button class="btn sec sm noprint" onclick="print()">Print label</button></div></div>`;
+      $("#app").innerHTML = h; new QRCode($("#qr"), { text: location.origin + "/#/verify/" + p.id, width: 160, height: 160 });
+      if ($("#go")) $("#go").onclick = async e => { e.target.disabled = true; toast("Capturing location..."); const g = await geo(); try { await api(`/passports/${id}/${p.status === "CREATED" ? "dispatch" : "deliver"}`, g); route() } catch (x) { toast(x.message, 1); e.target.disabled = false } }
+    }
+    async function pgFacility() {
+      const ps = (await api("/passports")).filter(p => p.status === "DELIVERED"), q = new URLSearchParams(location.hash.split("?")[1] || ""), pick = q.get("p") || ps[0]?.id;
+      let h = head("Home / Facility desk", "Facility receipt and quality certificate", "Verify the weighbridge weight, record contamination and issue the recycled-material certificate.");
+      if (!ps.length) return $("#app").innerHTML = h + `<div class="card empty">No loads are waiting. A load appears here after the driver confirms arrival at the facility.</div>`;
+      h += `<form class="card" id="rf"><h3>Receipt</h3><div class="row"><div><label>Load awaiting receipt <i>(type the passport ID)</i></label><input name="pid" id="rp" list="rpl" required autocomplete="off" value="${esc(pick || "")}"><datalist id="rpl">${ps.map(p => `<option value="${p.id}">${esc(META.categories[p.category].label)}, ${fmt(p.declared_kg, 0)} kg declared</option>`).join("")}</datalist></div>
+ <div><label>Weighbridge weight <i>(kg)</i></label><input name="actual_kg" type="number" min="1" required></div><div><label>Contamination <i>(%)</i></label><input name="contamination_pct" type="number" min="0" max="100" value="0"></div>
+ <div><label>Recycled output <i>(kg, optional)</i></label><input name="output_kg" type="number" min="0" placeholder="Calculated if blank"></div><div><label>Tests performed</label><input name="tests" placeholder="Sieve analysis, water absorption"></div><div><label>Decision</label><select name="decision"><option value="accept">Accept</option><option value="reject">Reject</option></select></div><div><label>Inspector</label><input name="inspector" required></div><div><label>Notes</label><input name="notes"></div></div>
+ <p><button class="btn">Issue certificate</button></p></form>`;
+      $("#app").innerHTML = h;
+      $("#rf").onsubmit = async e => {
+        e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)), pp = ps.find(x => x.id.toLowerCase() === o.pid.trim().toLowerCase()); if (!pp) return toast("No load awaiting receipt has that passport ID. Pick one from the suggestions or check the ID.", 1); const pid = pp.id; delete o.pid;["actual_kg", "contamination_pct"].forEach(k => o[k] = +o[k]); o.output_kg = o.output_kg ? +o.output_kg : null;
+        try { await api(`/passports/${pid}/receipt`, o); toast("Receipt recorded."); location.hash = "/verify/" + pid } catch (x) { toast(x.message, 1) }
+      }
+    }
+    async function pgVerify(id) {
+      const p = await api("/passports/" + id), c = p.cert;
+      if (!c) return $("#app").innerHTML = head("Verification", "Passport " + id, "No certificate has been issued for this load yet.") + `<div class="card">Current status: ${stc(p.status)}</div>`;
+      $("#app").innerHTML = `<div class="cert"><div class="crumb" style="text-align:center">Recycled material certificate</div><h2>${c.id}</h2><p class="lede" style="margin:0 auto 18px;text-align:center">${c.result === "Accepted" ? "The load below was received and processed at an authorised facility." : "The load below was rejected at the facility and was not recycled."}</p>
+ <dl class="kv"><dt>Result</dt><dd>${chip(c.result === "Accepted" ? "green" : "red").replace(/Compliant|Violation/, c.result)}</dd><dt>Passport</dt><dd>${p.id}</dd><dt>Origin site</dt><dd>${esc(p.audit.project)}, ${esc(p.audit.address)}</dd><dt>Material</dt><dd>${esc(META.categories[p.category].label)}</dd><dt>Declared weight</dt><dd>${fmt(p.declared_kg, 0)} kg</dd><dt>Weighbridge weight</dt><dd>${fmt(c.received_kg, 0)} kg (${c.variance_pct > 0 ? "+" : ""}${c.variance_pct}%)</dd><dt>Contamination</dt><dd>${c.contamination_pct}%</dd><dt>Recycled output</dt><dd>${fmt(c.output_kg, 0)} kg - ${esc(c.product)}</dd><dt>Tests</dt><dd>${esc(c.tests)}</dd><dt>Facility</dt><dd>${esc(c.facility)}</dd><dt>Inspector</dt><dd>${esc(c.inspector)}</dd><dt>Issued</dt><dd>${c.issued.replace("T", " ").slice(0, 19)} UTC</dd>${c.notes ? `<dt>Notes</dt><dd>${esc(c.notes)}</dd>` : ""}</dl>
+ <p class="noprint" style="margin-top:18px"><button class="btn" onclick="print()">Print certificate</button> <a class="btn sec" style="text-decoration:none;display:inline-block" href="#/loads/${p.id}">Open passport</a></p></div>`
+    }
+    const ROLES = { officer: "Contractor / site officer", driver: "Driver", facility: "Facility operator", municipal: "Municipal officer", buyer: "Buyer" };
+    const user = () => { try { return JSON.parse(localStorage.cdp_user) } catch { return null } };
+    const navTabs = () => { const U = user(); return U ? tabs.filter(t => t[2].includes(U.role)) : [["/login", "Sign in"], ["/report", "Report illegal dumping"]] };
+    const statStrip = d => `<div class="kpis s5"><div class="kpi"><b>${d.audits}</b><span>Registered sites</span></div><div class="kpi"><b>${d.passports_today}</b><span>Passports today</span></div><div class="kpi"><b>${d.in_transit}</b><span>Loads in transit</span></div><div class="kpi"><b>${d.amber + d.red}</b><span>Pending compliance</span><small>${d.red} violations</small></div><div class="kpi"><b>${fmt(d.reused_t)} t</b><span>Verified reuse</span><small>${d.reports_open} open citizen reports</small></div></div>`;
+    const quick = () => `<div class="card"><h3>Quick actions</h3><div class="actions"><a class="btn" href="#/audit">Register site audit</a><a class="btn sec" href="#/loads">Create passport</a><a class="btn sec" href="#/facility">Record facility receipt</a><a class="btn sec" href="#/batches">Create batch</a><a class="btn sec" href="#/market">Marketplace</a></div></div><div class="card"><h3>Facilities, trips in transit and citizen reports</h3><div id="map" style="height:320px" role="img" aria-label="Map of facilities, loads in transit and citizen reports"></div><p class="foot">Green: facilities with 300 m geofence. Orange: loads in transit. Red: open citizen reports. Map data from OpenStreetMap contributors; needs an internet connection.</p></div>`;
+    async function drawMap() {
+      if (!window.L || !$("#map")) return; const [rs, ps] = await Promise.all([api("/reports"), api("/passports")]);
+      const m = L.map("map").setView([19.1, 73.0], 10); L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap contributors", maxZoom: 18 }).addTo(m); const pts = [];
+      const add = (lat, lng, t, c) => { if (lat == null) return; pts.push([lat, lng]); L.circleMarker([lat, lng], { radius: 7, color: c, fillColor: c, fillOpacity: .8 }).addTo(m).bindPopup(t) };
+      META.facilities.forEach(f => { if (f.lat == null) return; add(f.lat, f.lng, "<b>" + esc(f.name) + "</b>", "#0e4d3a"); L.circle([f.lat, f.lng], { radius: 300, color: "#0e4d3a", weight: 1 }).addTo(m) });
+      ps.filter(p => p.status === "IN_TRANSIT").forEach(p => add(p.lat, p.lng, "In transit: " + p.id, "#e0560d"));
+      rs.filter(r => r.status !== "CLOSED").forEach(r => add(r.lat, r.lng, "Report " + r.id + ": " + esc(r.description), "#b3261e"));
+      if (pts.length) m.fitBounds(pts, { padding: [30, 30] })
+    }
+    function pgLogin() {
+      $("#app").innerHTML = head("Sign in", "Sign in to the officer console", "Enter your registered mobile number, choose your role and enter the one-time password.") + `<form class="card" id="lf" style="max-width:520px"><div class="row" style="grid-template-columns:1fr"><div><label for="mo">Mobile number</label><input id="mo" name="mobile" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit number"></div><div><label for="ro">Role</label><select id="ro" name="role">${Object.entries(ROLES).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></div><div><label for="ot">One-time password</label><input id="ot" name="otp" inputmode="numeric" maxlength="6" required><div class="foot">Demonstration build: the password is always 123456 and no SMS is sent. Role menus are not enforced by the server yet.</div></div></div><p><button class="btn">Sign in</button></p></form><p class="foot">Members of the public can <a href="#/report">report illegal dumping</a> without signing in.</p>`;
+      $("#lf").onsubmit = e => { e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)); if (o.otp !== "123456") return toast("The password is incorrect. Enter 123456 for this demonstration.", 1); localStorage.cdp_user = JSON.stringify({ mobile: o.mobile, role: o.role }); location.hash = o.role === "driver" ? "/loads" : "/"; route() }
+    }
+    async function pgBatches() {
+      const [bs, ps] = await Promise.all([api("/batches"), api("/passports")]); const ok = ps.filter(p => p.status === "CERTIFIED" && !p.batch_id && ["concrete", "brick", "tiles"].includes(p.category));
+      const T = ["Particle-size distribution", "Water absorption (%)", "Aggregate impact value (%)"];
+      let h = head("Home / Batches", "Output batches and certificates", "Combine certified input loads into one batch, record test results and publish a batch certificate with its own QR code.");
+      h += `<form class="card" id="bf"><h3>Create output batch</h3>${ok.length ? `<div class="scroll"><table><thead><tr><th>Include</th><th>Passport</th><th>Material</th><th class="n">Recycled output (kg)</th><th class="n">Contamination</th></tr></thead><tbody>${ok.map(p => `<tr><td><input type="checkbox" name="pid" value="${p.id}" aria-label="Include ${p.id}" style="width:auto"></td><td>${p.id}</td><td>${esc(META.categories[p.category].label)}</td><td class="n">${fmt(p.cert.output_kg, 0)}</td><td class="n">${p.cert.contamination_pct}%</td></tr>`).join("")}</tbody></table></div>
+ <h3 style="margin-top:20px">Test results</h3><div class="row">${T.map((t, i) => `<div><label>${t}</label><div style="display:flex;gap:8px"><input name="v${i}" placeholder="Value" required aria-label="${t} value"><select name="r${i}" style="width:90px" aria-label="${t} result"><option>Pass</option><option>Fail</option></select></div></div>`).join("")}</div>
+ <h3 style="margin-top:20px">Batch details</h3><div class="row"><div><label>Grade <i>(type, or pick a suggestion)</i></label><input name="grade" list="gr" required placeholder="10-20 mm recycled coarse aggregate"><datalist id="gr"><option value="10-20 mm recycled coarse aggregate"><option value="0-10 mm recycled fine aggregate"><option value="Granular sub-base mix"></datalist></div><div><label>Approved use</label><input name="approved_use" value="Paver blocks, road sub-base, non-structural concrete" required></div><div><label>Price (₹ per tonne)</label><input name="price" type="number" min="0" value="850" required></div></div><p><button class="btn">Create batch and certificate</button></p>`: `<div class="empty">No certified loads are waiting to be batched. Certify concrete, brick or tile loads at the facility desk first.</div>`}</form>
+ <div class="card"><h3>Batches</h3>${bs.length ? `<div class="scroll"><table><thead><tr><th>Batch</th><th>Grade</th><th class="n">Output (t)</th><th class="n">Available (t)</th><th>Certificate</th></tr></thead><tbody>${bs.map(b => `<tr class="click" onclick="location.hash='/batch/${b.id}'"><td>${b.id}</td><td>${esc(b.grade)}</td><td class="n">${fmt(b.output_kg / 1000, 2)}</td><td class="n">${fmt(b.available_kg / 1000, 2)}</td><td>${b.cert_no}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">No batches yet.</div>`}</div>`;
+      $("#app").innerHTML = h;
+      if ($("#bf")) $("#bf").onsubmit = async e => {
+        e.preventDefault(); const f = new FormData(e.target), ids = f.getAll("pid"); if (!ids.length) return toast("Select at least one load to include in the batch.", 1);
+        try { const b = await api("/batches", { passport_ids: ids, grade: f.get("grade"), approved_use: f.get("approved_use"), price_per_t: +f.get("price"), tests: T.map((t, i) => ({ name: t, value: f.get("v" + i), result: f.get("r" + i) })) }); toast("Batch " + b.id + " created."); location.hash = "/batch/" + b.id } catch (x) { toast(x.message, 1) }
+      }
+    }
+    async function pgBatchView(id) {
+      const b = await api("/batches/" + id);
+      $("#app").innerHTML = `<div class="cert"><div class="crumb" style="text-align:center">Recycled material batch certificate</div><h2>${b.id}</h2><p class="lede" style="margin:0 auto 18px;text-align:center">Certificate ${b.cert_no}. Issued ${b.created.replace("T", " ").slice(0, 19)} UTC.</p>
+ <dl class="kv"><dt>Grade</dt><dd>${esc(b.grade)}</dd><dt>Approved use</dt><dd>${esc(b.approved_use)}</dd><dt>Produced at</dt><dd>${esc(b.location)}</dd><dt>Total output</dt><dd>${fmt(b.output_kg / 1000, 2)} t</dd><dt>Still available</dt><dd>${fmt(b.available_kg / 1000, 2)} t</dd><dt>Price</dt><dd>₹${fmt(b.price_per_t, 0)} per tonne</dd></dl>
+ <h3 style="margin-top:20px">Test results</h3><table><thead><tr><th>Test</th><th>Value</th><th>Result</th></tr></thead><tbody>${b.tests.map(t => `<tr><td>${esc(t.name)}</td><td>${esc(t.value)}</td><td>${chip(t.result === "Pass" ? "green" : "red").replace(/Compliant|Violation/, t.result)}</td></tr>`).join("")}</tbody></table>
+ <h3 style="margin-top:20px">Input passports</h3><table><thead><tr><th>Passport</th><th>Material</th><th class="n">Output (kg)</th></tr></thead><tbody>${b.passports.map(p => `<tr><td><a href="#/verify/${p.id}">${p.id}</a></td><td>${esc(META.categories[p.category].label)}</td><td class="n">${fmt(p.cert.output_kg, 0)}</td></tr>`).join("")}</tbody></table>
+ <div id="qr" style="margin-top:18px"></div><p class="foot">Scan to verify this batch.</p><p class="noprint"><button class="btn" onclick="print()">Print certificate</button> <a class="btn sec" href="#/market">Marketplace</a></p></div>`;
+      new QRCode($("#qr"), { text: location.origin + "/#/batch/" + id, width: 120, height: 120 })
+    }
+    async function pgMarket() {
+      const [bs, rs] = await Promise.all([api("/batches"), api("/reuses")]), av = bs.filter(b => b.available_kg > 0);
+      let h = head("Home / Marketplace", "Recycled material marketplace", "Certified batches available for purchase. Every order creates a verified reuse record linked to the batch certificate.");
+      h += `<div class="card"><h3>Available batches</h3>${av.length ? `<div class="scroll"><table><thead><tr><th>Batch</th><th>Grade</th><th class="n">Available (t)</th><th class="n">Price (₹/t)</th><th>Location</th><th>Tests</th></tr></thead><tbody>${av.map(b => `<tr class="click" onclick="location.hash='/batch/${b.id}'"><td>${b.id}</td><td>${esc(b.grade)}</td><td class="n">${fmt(b.available_kg / 1000, 2)}</td><td class="n">${fmt(b.price_per_t, 0)}</td><td>${esc(b.location)}</td><td><span class="chip green">All passed</span></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">No certified batches are available. Create a batch from certified loads first.</div>`}</div>`;
+      if (av.length) h += `<form class="card" id="of"><h3>Place an order</h3><div class="row"><div><label>Batch <i>(type the batch ID)</i></label><input name="bid" list="bl" required autocomplete="off" placeholder="RCA-BATCH-2026-001"><datalist id="bl">${av.map(b => `<option value="${b.id}">${fmt(b.available_kg / 1000, 2)} t available</option>`).join("")}</datalist></div><div><label>Quantity <i>(tonnes)</i></label><input name="qty_t" type="number" min="0.1" step="0.1" required></div><div><label>Buyer name</label><input name="buyer" required></div><div><label>Project location</label><input name="project_location" required></div><div><label>Ward</label><input name="ward"></div><div><label>Application <i>(type, or pick a suggestion)</i></label><input name="application" list="ap" required placeholder="Road sub-base"><datalist id="ap"><option value="Paver blocks"><option value="Road sub-base"><option value="Backfill and embankment"><option value="Non-structural concrete"></datalist></div></div><p class="foot">The delivery location is taken from this device.</p><p><button class="btn">Place order and confirm reuse</button></p></form>`;
+      h += `<div class="card"><h3>Verified reuse records</h3>${rs.length ? `<div class="scroll"><table><thead><tr><th>Reuse ID</th><th>Batch</th><th class="n">Quantity (t)</th><th>Application</th><th>Project location</th></tr></thead><tbody>${rs.map(r => `<tr class="click" onclick="location.hash='/reuse/${r.id}'"><td>${r.id}</td><td>${r.batch_id}</td><td class="n">${fmt(r.qty_kg / 1000, 2)}</td><td>${esc(r.application)}</td><td>${esc(r.project_location)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">No reuse recorded yet.</div>`}</div>`;
+      $("#app").innerHTML = h;
+      if ($("#of")) $("#of").onsubmit = async e => {
+        e.preventDefault(); const o = Object.fromEntries(new FormData(e.target)), b = av.find(x => x.id.toLowerCase() === o.bid.trim().toLowerCase()); if (!b) return toast("No available batch has that ID. Pick one from the suggestions or check the ID.", 1); const bid = b.id; delete o.bid; o.qty_t = +o.qty_t; Object.assign(o, await geo());
+        try { const r = await api(`/batches/${bid}/order`, o); toast("Reuse " + r.id + " confirmed."); location.hash = "/reuse/" + r.id } catch (x) { toast(x.message, 1) }
+      }
+    }
+    async function pgReuse(id) {
+      const r = await api("/reuses/" + id);
+      $("#app").innerHTML = `<div class="cert"><div class="crumb" style="text-align:center">Final reuse certificate</div><h2>${r.id}</h2><p class="lede" style="margin:0 auto 18px;text-align:center"><span class="chip green">Verified reuse complete</span></p>
+ <dl class="kv"><dt>Certificate</dt><dd>${r.cert_no}</dd><dt>Source batch</dt><dd><a href="#/batch/${r.batch_id}">${r.batch_id}</a> (${esc(r.grade)})</dd><dt>Quantity used</dt><dd>${fmt(r.qty_kg / 1000, 2)} t</dd><dt>Application</dt><dd>${esc(r.application)}</dd><dt>Buyer</dt><dd>${esc(r.buyer)}</dd><dt>Project location</dt><dd>${esc(r.project_location)}${r.ward ? ", " + esc(r.ward) : ""}</dd><dt>Delivery location</dt><dd>${r.lat != null ? r.lat.toFixed(4) + ", " + r.lng.toFixed(4) : "Not captured"}</dd><dt>Recorded</dt><dd>${r.created.replace("T", " ").slice(0, 19)} UTC</dd></dl>
+ <p class="noprint" style="margin-top:18px"><button class="btn" onclick="print()">Print certificate</button> <a class="btn sec" href="#/market">Marketplace</a></p></div>`}
+    const RS = { OPEN: ["amber", "Open"], VERIFIED: ["amber", "Verified"], ASSIGNED: ["grey", "Assigned"], CLOSED: ["green", "Closed"] };
+    const rchip = s => `<span class="chip ${RS[s][0]}">${RS[s][1]}</span>`;
+    const shrink = f => new Promise(r => { if (!f || !f.size) return r(""); const i = new Image(); i.onload = () => { const k = Math.min(1, 800 / Math.max(i.width, i.height)), c = document.createElement("canvas"); c.width = i.width * k; c.height = i.height * k; c.getContext("2d").drawImage(i, 0, 0, c.width, c.height); r(c.toDataURL("image/jpeg", .7)) }; i.onerror = () => r(""); i.src = URL.createObjectURL(f) });
+    async function pgReport() {
+      $("#app").innerHTML = head("Citizen services", "Report illegal dumping", "Tell the municipal corporation about construction or demolition debris dumped in a public place. You do not need to sign in.") + `<form class="card" id="rf2" style="max-width:720px"><h3>Report details</h3><div class="row"><div><label>Ward</label><input name="ward" required placeholder="e.g. Ward 12"></div><div><label>Location or landmark</label><input name="location" required></div><div><label>Mobile number <i>(optional)</i></label><input name="mobile" inputmode="numeric" maxlength="10"></div><div><label>Photo <i>(optional)</i></label><input name="photo" type="file" accept="image/*"></div></div><div style="margin-top:14px"><label>What was dumped?</label><textarea name="description" required></textarea></div><p class="foot">Your device location is attached to the report if you allow it.</p><p><button class="btn">Submit report</button></p></form>
+ <div class="card" style="max-width:720px"><h3>Check the status of a report</h3><div class="row"><div><label for="ref">Reference number</label><input id="ref" placeholder="RPT-XXXXXX"></div><div style="align-self:end"><button class="btn sec" id="chk" type="button">Check status</button></div></div><div id="rres" style="margin-top:14px"></div></div>`;
+      const chk = async () => { try { const r = await api("/reports/" + encodeURIComponent($("#ref").value.trim())); $("#rres").innerHTML = `<p><b>${r.id}</b> ${rchip(r.status)} - ${esc(r.ward)}, ${esc(r.location)}</p><ul class="tl">${r.history.map(h => `<li><b>${RS[h.status][1]}</b><br>${esc(h.note)}<br><code>${h.ts.replace("T", " ").slice(0, 19)} UTC</code></li>`).join("")}</ul>` } catch (x) { $("#rres").innerHTML = `<div class="alert red">No report found with that reference number. Check the number and try again.</div>` } };
+      $("#chk").onclick = chk;
+      $("#rf2").onsubmit = async e => {
+        e.preventDefault(); const f = new FormData(e.target), o = Object.fromEntries(f); o.photo = await shrink(f.get("photo")); Object.assign(o, await geo());
+        try { const r = await api("/reports", o); e.target.reset(); $("#ref").value = r.id; toast("Report submitted. Your reference number is " + r.id + "."); chk() } catch (x) { toast(x.message, 1) }
+      }
+    }
+    async function pgReports() {
+      const rs = await api("/reports");
+      $("#app").innerHTML = head("Home / Citizen reports", "Citizen reports of illegal dumping", "Verify each report, assign it for action and close it once cleared. Citizens can track status with their reference number.") + `<div class="card">${rs.length ? `<div class="scroll"><table><thead><tr><th>Reference</th><th>Ward and location</th><th>Description</th><th>Photo</th><th>Status</th><th>Update</th></tr></thead><tbody>${rs.map(r => `<tr><td>${r.id}<br><span class="foot">${r.created.slice(0, 10)}</span></td><td>${esc(r.ward)}<br>${esc(r.location)}</td><td>${esc(r.description)}</td><td>${r.photo ? `<img class="thumb" src="${r.photo}" alt="Photo for ${r.id}">` : "-"}</td><td>${rchip(r.status)}</td><td style="white-space:nowrap"><select id="s_${r.id}" aria-label="New status for ${r.id}" style="width:auto">${Object.entries(RS).map(([k, v]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${v[1]}</option>`).join("")}</select> <button class="btn sm" onclick="setRS('${r.id}')">Update</button></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">No citizen reports yet.</div>`}</div>`
+    }
+    async function setRS(id) { try { await api(`/reports/${id}/status`, { status: $("#s_" + id).value, note: "Updated by municipal officer" }); toast("Status updated."); route() } catch (x) { toast(x.message, 1) } }
+
+    async function pgFacilities() {
+      const fs = META.facilities;
+      $("#app").innerHTML = head("Home / Facilities", "Authorised facilities", "Register a recycling, scrap or hazardous-waste facility. Loads can only be routed to a facility that is authorised for that material.") + `<form class="card" id="ff"><h3>Register a facility</h3><div class="row"><div><label>Facility name</label><input name="name" required></div><div><label>Latitude</label><input name="lat" type="number" step="any" min="-90" max="90" required placeholder="19.2183"></div><div><label>Longitude</label><input name="lng" type="number" step="any" min="-180" max="180" required placeholder="72.9781"></div></div><p><button type="button" class="btn sec sm" id="here">Use my current location</button></p><fieldset style="border:1px solid var(--line);padding:12px 14px"><legend style="font-weight:600;font-size:13px">Materials this facility is authorised to accept</legend><div class="row">${Object.entries(META.categories).map(([k, v]) => `<label style="font-weight:400"><input type="checkbox" name="acc" value="${k}" style="width:auto"> ${esc(v.label)}</label>`).join("")}</div></fieldset><p class="foot">A hazardous-waste facility must accept hazardous waste only.</p><p><button class="btn">Register facility</button></p></form>
+ <div class="card"><h3>Registered facilities</h3><div class="scroll"><table><thead><tr><th>ID</th><th>Name</th><th>Accepts</th><th>Location</th></tr></thead><tbody>${fs.map(f => `<tr><td>${f.id}</td><td>${esc(f.name)}</td><td>${f.accepts.map(c => esc(META.categories[c].label)).join(", ")}</td><td>${f.lat != null ? f.lat.toFixed(4) + ", " + f.lng.toFixed(4) : "Not set"}</td></tr>`).join("")}</tbody></table></div></div>`;
+      $("#here").onclick = async () => { const g = await geo(); if (g.lat == null) return toast("Location is not available. Enter latitude and longitude by hand.", 1); $("#ff").lat.value = g.lat.toFixed(5); $("#ff").lng.value = g.lng.toFixed(5) };
+      $("#ff").onsubmit = async e => {
+        e.preventDefault(); const f = new FormData(e.target);
+        try { await api("/facilities", { name: f.get("name"), lat: +f.get("lat"), lng: +f.get("lng"), accepts: f.getAll("acc") }); META = null; toast("Facility registered."); route() } catch (x) { toast(x.message, 1) }
+      }
+    }
+
+    route();
+  </script>
+</body>
+
+</html>
