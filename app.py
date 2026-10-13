@@ -1303,11 +1303,16 @@ def dashboard2(audit_id: str | None = None):
 # FRONTEND
 # ---------------------------------------------------------
 
+
+from fastapi.staticfiles import StaticFiles
+
+# Frontend files are inside the app/static folder
 app.mount(
     "/static",
     StaticFiles(
         directory=os.path.join(
             os.path.dirname(__file__),
+            "app",
             "static",
         )
     ),
@@ -1320,8 +1325,8 @@ def index():
     return FileResponse(
         os.path.join(
             os.path.dirname(__file__),
+            "app",
             "static",
             "index.html",
         )
     )
-
